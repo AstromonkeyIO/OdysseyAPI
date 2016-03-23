@@ -8,10 +8,12 @@ var express    = require('express');        // call express
 var app        = express();                 // define our app using express
 var bodyParser = require('body-parser');
 var mongoose   = require('mongoose');
+var relationship = require("mongoose-relationship");
 var Bear     = require('./app/models/bear');
 var User     = require('./app/models/user');
 var Board     = require('./app/models/board');
-
+var Task     = require('./app/models/task');
+var Comment     = require('./app/models/comment');
 
 mongoose.connect('mongodb://bob:1@ds023468.mlab.com:23468/odyssey', function(err, res) {
     console.log("mongoose connected");
@@ -45,7 +47,7 @@ router.get('/', function(req, res) {
 });
 
 
-//User API Calls
+// User API Calls
 router.route('/users/')
 
     // create a user (accessed at POST http://localhost:8080/api/users)
@@ -152,7 +154,7 @@ router.route('/users/:user_id')
 /****/
 
 
-//Boards API Calls
+// Boards API Calls
 router.route('/boards/')
 
     // create a board (accessed at POST http://localhost:8080/api/boards)
@@ -161,15 +163,15 @@ router.route('/boards/')
         var board = new Board();      // create a new instance of the Board model
         board.title = req.body.title;  // set the title (comes from the request)
         board.description = req.body.description;  // set the description (comes from the request)
-        board.userId = req.body.userId; // set the id of user creating the board (comes from the request)
+        board.creator = req.body.creatorId; // set the id of user creating the board (comes from the request)
 
+        // check if the board already exists or not
         Board.findOne({title : board.title}, function(err, existingBoard) {
 
             if(err) {
                 res.send(err);
             }
 
-            // check if the user already exists or not
             if(existingBoard) {
                 res.json("board already exists");
             } else {
@@ -187,13 +189,9 @@ router.route('/boards/')
     // get all boards (accessed at GET http://localhost:8080/api/boards)
     .get(function(req, res) { 
 
-        Board.find(function(err, boards) {
-            if (err) {
-                res.send(err);
-            } else {
-                res.json(boards);
-            }
-        });
+        Board.find().populate('creator').exec(function(error, boards) {
+            res.json(boards);
+        })
 
     });
 
@@ -262,6 +260,175 @@ router.route('/boards/user/:user_id')
 
     });
 /****/
+
+
+// Tasks API Calls
+router.route('/tasks/')
+
+    // create a task (accessed at POST http://localhost:8080/api/tasks)
+    .post(function(req, res) {
+
+        var task = new Task();      // create a new instance of the Task model
+        task.title = req.body.title;  // set the title (comes from the request)
+        task.description = req.body.description;  // set the description (comes from the request)
+        task.creator = req.body.creatorId; // set the id of user creating the task (comes from the request)
+        task.board = req.body.boardId // set the id of the board that the task is in (comes from the request)
+        task.assignee = req.body.assigneeId // set the id of the assignee
+
+        // check if the task already exists or not
+        Task.findOne({title : task.title}, function(err, existingTask) {
+
+            if(err) {
+                res.send(err);
+            }
+
+            if(existingTask) {
+                res.json("task already exists");
+            } else {
+                // save the task and check for errors
+                task.save(function(err, task) {
+                    if (err)
+                        res.send(err);
+                    
+                    // store saved task temporarily to return it later
+                    var task = task;
+                    var board = new Board(); // create a new instance of the Board model
+                    // find the board that it is assigned to
+                    Board.findById(task.board).populate('creator').populate('tasks').exec(function(error, board) {
+                        if(error)
+                            res.json(error);
+                        // add the new task to the board that it belongs to and save
+                        console.log(board);
+                        board.tasks.push(task._id);
+                        board.save(function(err, board) {
+                            res.json(task);
+                        });
+                    });
+
+                });
+            }
+
+        });        
+
+    })
+    // get all tasks (accessed at GET http://localhost:8080/api/tasks)
+    .get(function(req, res) { 
+
+        Task.find().populate('creator').populate('board').populate('assignee').populate('comments').exec(function(error, tasks) {
+            res.json(tasks);
+        })
+
+    });
+
+router.route('/tasks/:task_id')
+
+    // get the task with that id (accessed at GET http://localhost:8080/api/tasks/:task_id)
+    .get(function(req, res) {
+        Task.findById(req.params.task_id).populate('creator').populate('board').populate('assignee').populate('comments').exec(function(error, task) {
+            if(error)
+                res.json(error);
+            Task.populate(task.comments, 'creator', function(err, comments){
+                // this grabs all the comments associated with the task
+                res.json(task);
+            });
+
+            //res.json(task);
+        });
+    })
+    // update the task with that id (accessed at PUT http://localhost:8080/api/tasks/:task_id)
+   .put(function(req, res) {
+
+        // use our task model to find the task we want
+        Task.findById(req.params.task_id, function(err, task) {
+
+            if (err)
+                res.send(err);
+
+            // update the task
+            task.title = req.body.title;
+            task.description = req.body.description;
+            task.priority = req.body.priority;
+            task.workflow = req.body.workflow;
+            task.assignee = req.body.assigneeId;
+            // save the task
+            task.save(function(error, tasks) {
+                if (err)
+                    res.send(err);
+
+                res.json(task);
+            });
+
+        });
+    })
+    // delete the task with that id (accessed at DELETE http://localhost:8080/api/tasks/:task_id)
+    .delete(function(req, res) {
+        Task.remove({
+            _id: req.params.task_id
+        }, function(err, task) {
+            if (err)
+                res.send(err);
+
+            res.json({ message: 'Successfully deleted', task: task });
+        });
+    });
+/****/
+
+// Comments API Calls
+router.route('/comments/')
+
+    // create a comment(accessed at POST http://localhost:8080/api/comments)
+    .post(function(req, res) {
+
+        var comment= new Comment();      // create a new instance of the Comment model
+        comment.comment = req.body.comment;  // set the comment (comes from the request)
+        //comment.date = req.body.date;  // set the date(comes from the request)
+        comment.creator = req.body.creatorId; // set the id of user creating the comment (comes from the request)
+        comment.task = req.body.taskId; // set the id of task of the comment (comes from the request)
+        
+        var taskId = comment.task // temporarily store associated task ID
+
+        // save the comment and check for errors
+        comment.save(function(err, comment) {
+            if (err)
+                res.send(err);
+                
+            Task.findById(taskId).populate('creator').populate('board').populate('assignee').populate('comments').exec(function(error, task) {
+                if(error)
+                    res.json(error);
+
+                // add the new comment to the task that it belongs to and save
+                console.log(task);
+                task.comments.push(comment._id);
+                task.save(function(err, task) {
+                    if(err)
+                        res.json(err);
+
+                    console.log("task : ");
+                    console.log(task);
+
+
+                    res.json(comment);
+
+                });
+            });            
+            //res.json(comment);
+        });       
+
+    })
+    // get all comments (accessed at GET http://localhost:8080/api/comments)
+    .get(function(req, res) { 
+        /*
+        Board.find().populate('creator').exec(function(error, boards) {
+            res.json(boards);
+        })
+        */
+
+    });
+
+/****/
+
+
+
 
 
 router.route('/bears')

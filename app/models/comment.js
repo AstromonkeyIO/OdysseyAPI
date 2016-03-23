@@ -1,18 +1,17 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-var BoardSchema   = new Schema({
-    title: {type: String, index: {unique: true}},
-    description: String,
+var CommentSchema   = new Schema({
+    comment: String,
+    date: { type: Date, default: Date.now },
     creator: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
-    tasks: [{
+    task: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Task'
-    }]
-
+    }
 });
 
-module.exports = mongoose.model('Board', BoardSchema);
+module.exports = mongoose.model('Comment', CommentSchema);
