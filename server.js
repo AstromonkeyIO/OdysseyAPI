@@ -85,7 +85,7 @@ router.route('/users/')
             if (err) {
                 res.send(err);
             } else {
-                res.json(users);
+                res.send("dinosaur(" + users + ")");
             }
         });
 
