@@ -94,7 +94,7 @@ router.route('/users/')
                     if (err)
                         res.send(err);
 
-                    res.send("callback(" + JSON.stringify(user) + ")");
+                    res.json(user);
                 });
             }
 
