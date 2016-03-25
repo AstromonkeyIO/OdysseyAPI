@@ -71,7 +71,8 @@ router.route('/users/')
                 user.save(function(err, user) {
                     if (err)
                         res.send(err);
-                    res.json(user);
+                    
+                    res.send("callback(" + JSON.stringify(user) + ")");
                 });
             }
 
