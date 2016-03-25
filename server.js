@@ -85,7 +85,7 @@ router.route('/users/')
             if (err) {
                 res.send(err);
             } else {
-                res.send("dinosaur(" + JSON.stringify(users) + ")");
+                res.send("callback(" + JSON.stringify(users) + ")");
             }
         });
 
@@ -104,7 +104,7 @@ router.route('/users/:username/:password')
             if(err)
                 res.send(err);
 
-            res.json(user);
+                res.send("callback(" + JSON.stringify(user) + ")");
         });
     });
 
