@@ -127,7 +127,7 @@ router.route('/users/:username/:password')
             if(err)
                 res.send(err);
 
-                res.send("callback(" + JSON.stringify(user) + ")");
+                res.send(user);
         });
     });
 
