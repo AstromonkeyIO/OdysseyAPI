@@ -65,7 +65,9 @@ router.use(function(req, res, next) {
 
 // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
 router.get('/', function(req, res) {
-    res.json({ message: 'hooray! welcome to our api!' });   
+
+    res.json({ message: 'hooray! welcome to our api!' });
+
 });
 
 
@@ -345,6 +347,12 @@ router.route('/tasks/')
     // get all tasks (accessed at GET http://localhost:8080/api/tasks)
     .get(function(req, res) { 
 
+        if(typeof(req.query.boardId) !== 'undefined') {
+            Task.find({"Board._id" : req.query.boardId}).populate('creator').populate('board').populate('assignee').populate('comments').exec(function(error, tasks) {
+                res.json(tasks);
+            });
+        }
+        
         Task.find().populate('creator').populate('board').populate('assignee').populate('comments').exec(function(error, tasks) {
             res.json(tasks);
         })
