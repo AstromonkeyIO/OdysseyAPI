@@ -351,12 +351,11 @@ router.route('/tasks/')
             Task.find({"Board._id" : req.query.boardId}).populate('creator').populate('board').populate('assignee').populate('comments').exec(function(error, tasks) {
                 res.json(tasks);
             });
+        } else {
+            Task.find().populate('creator').populate('board').populate('assignee').populate('comments').exec(function(error, tasks) {
+                res.json(tasks);
+            })
         }
-        
-        Task.find().populate('creator').populate('board').populate('assignee').populate('comments').exec(function(error, tasks) {
-            res.json(tasks);
-        })
-
     });
 
 router.route('/tasks/:task_id')
@@ -371,7 +370,6 @@ router.route('/tasks/:task_id')
                 res.json(task);
             });
 
-            //res.json(task);
         });
     })
     // update the task with that id (accessed at PUT http://localhost:8080/api/tasks/:task_id)
