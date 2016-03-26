@@ -188,7 +188,14 @@ router.route('/boards/')
         board.description = req.body.description;  // set the description (comes from the request)
         board.creator = req.body.creatorId; // set the id of user creating the board (comes from the request)
 
+        board.save(function(err, board) {
+            if (err)
+                res.send(err);
+            res.json(board);
+        });
+
         // check if the board already exists or not
+        /*
         Board.findOne({title : board.title}, function(err, existingBoard) {
 
             if(err) {
@@ -206,7 +213,8 @@ router.route('/boards/')
                 });
             }
 
-        });        
+        });
+        */        
 
     })
     // get all boards (accessed at GET http://localhost:8080/api/boards)
