@@ -204,6 +204,10 @@ router.route('/boards/')
     // create a board (accessed at POST http://localhost:8080/api/boards)
     .post(function(req, res) {
 
+        res.header('Access-Control-Allow-Origin', '*'); 
+        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
+        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+        
         var board = new Board();      // create a new instance of the Board model
         board.title = req.body.title;  // set the title (comes from the request)
         board.description = req.body.description;  // set the description (comes from the request)
@@ -241,6 +245,10 @@ router.route('/boards/')
     // get all boards (accessed at GET http://localhost:8080/api/boards)
     .get(function(req, res) { 
 
+        res.header('Access-Control-Allow-Origin', '*'); 
+        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
+        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+        
         Board.find().populate('creator').exec(function(error, boards) {
             res.json(boards);
         })
@@ -262,6 +270,10 @@ router.route('/boards/:board_id')
     //update the board with that id (accessed at PUT http://localhost:8080/api/boards/:board_id)
    .put(function(req, res) {
 
+        res.header('Access-Control-Allow-Origin', '*'); 
+        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
+        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+        
         // use our board model to find the board we want
         Board.findById(req.params.board_id, function(err, board) {
 
@@ -423,7 +435,7 @@ router.route('/tasks/:task_id')
         res.header('Access-Control-Allow-Origin', '*'); 
         res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
         res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-        
+
         Task.remove({
             _id: req.params.task_id
         }, function(err, task) {
