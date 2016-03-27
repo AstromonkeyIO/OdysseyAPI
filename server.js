@@ -285,6 +285,11 @@ router.route('/boards/:board_id')
     })
     //delete the board with that id (accessed at DELETE http://localhost:8080/api/boards/:board_id)
     .delete(function(req, res) {
+
+        res.header('Access-Control-Allow-Origin', '*'); 
+        res.header('Access-Control-Allow-Methods', 'GET, POST');
+        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+
         Board.remove({
             _id: req.params.board_id
         }, function(err, board) {
