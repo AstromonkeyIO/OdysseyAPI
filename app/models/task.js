@@ -6,6 +6,7 @@ var TaskSchema   = new Schema({
     description: String,
     priority: String,
     workflow: String,
+    boardId: String,
     creator: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'

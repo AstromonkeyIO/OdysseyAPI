@@ -305,7 +305,7 @@ router.route('/tasks/')
         task.title = req.body.title;  // set the title (comes from the request)
         task.description = req.body.description;  // set the description (comes from the request)
         task.creator = req.body.creatorId; // set the id of user creating the task (comes from the request)
-        task.board = req.body.boardId // set the id of the board that the task is in (comes from the request)
+        task.boardId = req.body.boardId // set the id of the board that the task is in (comes from the request)
         task.assignee = req.body.assigneeId // set the id of the assignee
 
         // check if the task already exists or not
@@ -348,7 +348,8 @@ router.route('/tasks/')
     .get(function(req, res) { 
 
         if(typeof(req.query.boardId) !== 'undefined') {
-            Task.find({"Board._id" : req.query.boardId}).populate('creator').populate('board').populate('assignee').populate('comments').exec(function(error, tasks) {
+
+            Task.find({boardId : req.query.boardId}).populate('creator').populate('board').populate('assignee').populate('comments').exec(function(error, tasks) {
                 res.json(tasks);
             });
         } else {
