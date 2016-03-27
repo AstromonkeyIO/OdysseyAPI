@@ -320,6 +320,10 @@ router.route('/tasks/')
     // create a task (accessed at POST http://localhost:8080/api/tasks)
     .post(function(req, res) {
 
+        res.header('Access-Control-Allow-Origin', '*'); 
+        res.header('Access-Control-Allow-Methods', 'GET, POST');
+        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+
         var task = new Task();      // create a new instance of the Task model
         task.title = req.body.title;  // set the title (comes from the request)
         task.description = req.body.description;  // set the description (comes from the request)
@@ -327,40 +331,31 @@ router.route('/tasks/')
         task.boardId = req.body.boardId // set the id of the board that the task is in (comes from the request)
         task.assignee = req.body.assigneeId // set the id of the assignee
 
-        // check if the task already exists or not
-        Task.findOne({title : task.title}, function(err, existingTask) {
 
-            if(err) {
+        task.save(function(err, task) {
+            if (err)
                 res.send(err);
-            }
+            
+            // store saved task temporarily to return it later
+            var task = task;
 
-            if(existingTask) {
-                res.json("task already exists");
-            } else {
-                // save the task and check for errors
-                task.save(function(err, task) {
-                    if (err)
-                        res.send(err);
-                    
-                    // store saved task temporarily to return it later
-                    var task = task;
-                    var board = new Board(); // create a new instance of the Board model
-                    // find the board that it is assigned to
-                    Board.findById(task.board).populate('creator').populate('tasks').exec(function(error, board) {
-                        if(error)
-                            res.json(error);
-                        // add the new task to the board that it belongs to and save
-                        console.log(board);
-                        board.tasks.push(task._id);
-                        board.save(function(err, board) {
-                            res.json(task);
-                        });
-                    });
-
+            res.json(task);
+            /*
+            var board = new Board(); // create a new instance of the Board model
+            // find the board that it is assigned to
+            Board.findById(task.board).populate('creator').populate('tasks').exec(function(error, board) {
+                if(error)
+                    res.json(error);
+                // add the new task to the board that it belongs to and save
+                console.log(board);
+                board.tasks.push(task._id);
+                board.save(function(err, board) {
+                    res.json(task);
                 });
-            }
+            });
+            */
 
-        });        
+        });       
 
     })
     // get all tasks (accessed at GET http://localhost:8080/api/tasks)
