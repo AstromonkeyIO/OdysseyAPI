@@ -8,6 +8,7 @@ var express    = require('express');        // call express
 var app        = express();                 // define our app using express
 var bodyParser = require('body-parser');
 var mongoose   = require('mongoose');
+var cors = require('cors')
 //var relationship = require("mongoose-relationship");
 var Bear     = require('./app/models/bear');
 var User     = require('./app/models/user');
@@ -51,6 +52,10 @@ app.use(function (req, res, next) {
 
 var port = process.env.PORT || 8080; 
 
+
+app.use(cors());
+app.options('*', cors()); // include before other routes
+
 // ROUTES FOR OUR API
 // =============================================================================
 var router = express.Router();              // get an instance of the express Router
@@ -62,13 +67,7 @@ router.use(function(req, res, next) {
     next(); // make sure we go to the next routes and don't stop here
 });
 
-//just added
-app.all('*', function(req, res, next) {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
-  next();
-});
+
 
 // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
 router.get('/', function(req, res) {
