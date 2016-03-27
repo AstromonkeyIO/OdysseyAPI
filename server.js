@@ -328,9 +328,9 @@ router.route('/tasks/')
         task.title = req.body.title;  // set the title (comes from the request)
         task.description = req.body.description;  // set the description (comes from the request)
         task.creator = req.body.creatorId; // set the id of user creating the task (comes from the request)
-        task.boardId = req.body.boardId // set the id of the board that the task is in (comes from the request)
-        task.assignee = req.body.assigneeId // set the id of the assignee
-
+        task.boardId = req.body.boardId; // set the id of the board that the task is in (comes from the request)
+        task.assignee = req.body.assigneeId; // set the id of the assignee
+        task.workflow = req.body.workflow;
 
         task.save(function(err, task) {
             if (err)
