@@ -288,7 +288,7 @@ router.route('/boards/:board_id')
                
                 if (err)
                     res.send(err);
-                console.log("updated");
+
                 res.json(board);
 
             });
@@ -407,6 +407,10 @@ router.route('/tasks/:task_id')
     // update the task with that id (accessed at PUT http://localhost:8080/api/tasks/:task_id)
    .put(function(req, res) {
 
+        res.header('Access-Control-Allow-Origin', '*'); 
+        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
+        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+        
         // use our task model to find the task we want
         Task.findById(req.params.task_id, function(err, task) {
 
