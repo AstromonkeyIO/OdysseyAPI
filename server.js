@@ -287,7 +287,7 @@ router.route('/boards/:board_id')
     .delete(function(req, res) {
 
         res.header('Access-Control-Allow-Origin', '*'); 
-        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE');
+        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
         res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
 
         Board.remove({
@@ -419,6 +419,11 @@ router.route('/tasks/:task_id')
     })
     // delete the task with that id (accessed at DELETE http://localhost:8080/api/tasks/:task_id)
     .delete(function(req, res) {
+
+        res.header('Access-Control-Allow-Origin', '*'); 
+        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
+        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+        
         Task.remove({
             _id: req.params.task_id
         }, function(err, task) {
