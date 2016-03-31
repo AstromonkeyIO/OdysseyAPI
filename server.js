@@ -468,6 +468,7 @@ router.route('/workflows/:workflow_id')
             if (err)
                 res.send(err);
 
+            /*
             var task = task;
 
             Workflow.findOne({_id : req.params.workflow_id}, function( err, workflow) {
@@ -483,6 +484,7 @@ router.route('/workflows/:workflow_id')
                 });
 
             });
+            */
 
             res.json(task);
         });        
