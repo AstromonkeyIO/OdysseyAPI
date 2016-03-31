@@ -468,23 +468,23 @@ router.route('/workflows/:workflow_id')
             if (err)
                 res.send(err);
 
-            /*
             var task = task;
+            Workflow.findById(req.params.workflow_id, function(err, workflow) {
 
-            Workflow.findOne({_id : req.params.workflow_id}, function( err, workflow) {
-                if(err) 
+                if (err)
                     res.send(err);
 
-                workflow.tasks.push(task._id);
+                workflow.tasks.push(task._id)
                 workflow.save(function(err, workflow) {
+                   
                     if (err)
                         res.send(err);
-                    
+
                     //res.json(workflow);
+
                 });
 
-            });
-            */
+            });            
 
             res.json(task);
         });        
