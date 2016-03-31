@@ -142,6 +142,10 @@ router.route('/users/:username/:password')
     // find user by username and password (accessed at GET http://localhost:8080/api/users/:username/:password)
     .get(function(req, res) {
 
+        res.header('Access-Control-Allow-Origin', '*'); 
+        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
+        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+        
         username = req.params.username;
         password = req.params.password;
 
@@ -320,7 +324,6 @@ router.route('/boards/:board_id/workflows')
             res.json(workflows);});
 
         });
-
 
 router.route('/boards/user/:user_id')
 
