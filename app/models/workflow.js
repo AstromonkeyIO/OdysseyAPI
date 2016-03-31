@@ -1,13 +1,9 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-var TaskSchema   = new Schema({
-
+var WorkflowSchema   = new Schema({
+    
     title: String,
-    description: String,
-    priority: String,
-    workflow: String,
-    boardId: String,
     creator: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
@@ -16,14 +12,10 @@ var TaskSchema   = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Board'
     },
-    assignee: {
+    tasks: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-    },
-    comments: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Comment'
+        ref: 'Task'
     }]
 });
 
-module.exports = mongoose.model('Task', TaskSchema);
+module.exports = mongoose.model('Workflow', TaskSchema);
