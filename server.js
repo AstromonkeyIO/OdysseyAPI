@@ -308,6 +308,20 @@ router.route('/boards/:board_id')
         });
     });
 
+router.route('/boards/:board_id/workflows')
+
+    .get(function(req, res) {
+
+        res.header('Access-Control-Allow-Origin', '*'); 
+        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
+        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+
+        Workflow.find({ 'board' :  (req.params.board_id) }).populate('creator').populate('tasks').exec(function(error, workflows) {
+            res.json(workflows);});
+
+        });
+
+
 router.route('/boards/user/:user_id')
 
     // get the board with user_id (accessed at GET http://localhost:8080/api/boards/:user_id)
@@ -379,6 +393,7 @@ router.route('/workflows/:workflow_id')
         Workflow.findById(req.params.workflow_id, function(err, workflow) {
             if (err)
                 res.send(err);
+
             res.json(workflow);
         });
 
@@ -428,6 +443,67 @@ router.route('/workflows/:workflow_id')
 
         });
     });
+
+ router.route('/workflows/:workflow_id/tasks')
+
+    // addd a new task to the requested workflow (accessed at POST http://localhost:8080/api/workflows/:work_flow_id/tasks)
+    .post(function(req, res) {
+
+        res.header('Access-Control-Allow-Origin', '*'); 
+        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
+        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+        
+        var task = new Task();      // create a new instance of the Task model
+        task.title = req.body.title;  // set the title (comes from the request)
+        task.description = req.body.description;  // set the description (comes from the request)
+        task.creator = req.body.creatorId; // set the id of user creating the task (comes from the request)
+        task.workflow = req.params.workflow_id; // set the id of the board that the task is in (comes from the request)
+        task.assignee = req.body.assigneeId; // set the id of the assignee
+        //task.workflow = req.body.workflow;
+
+        task.save(function(err, task) {
+            if (err)
+                res.send(err);
+
+            var task = task;
+
+            Workflow.findOne({_id : req.params.workflow_id}, function( err, workflow) {
+                if(err) 
+                    res.send(err);
+
+                workflow.tasks.push(task._id);
+                workflow.save(function(err, workflow) {
+                    if (err)
+                        res.send(err);
+                    
+                    //res.json(workflow);
+                });
+
+            });
+
+            res.json(task);
+        });        
+
+    })
+    //delete the workflow with requested id (accessed at DELETE http://localhost:8080/api/workflows/:workflow_id)
+    .delete(function(req, res) {
+
+        res.header('Access-Control-Allow-Origin', '*'); 
+        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
+        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+
+        Workflow.remove({
+            _id: req.params.workflow_id
+        }, function(err, workflow) {
+            
+            if (err)
+                res.send(err);
+
+            res.json({ message: 'Successfully deleted', workflow: workflow});
+
+        });
+    });
+
 /****/
 
 

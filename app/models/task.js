@@ -16,6 +16,10 @@ var TaskSchema   = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Board'
     },
+    workflow: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Workflow'
+    },   
     assignee: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
