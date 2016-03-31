@@ -18,4 +18,4 @@ var WorkflowSchema   = new Schema({
     }]
 });
 
-module.exports = mongoose.model('Workflow', TaskSchema);
+module.exports = mongoose.model('Workflow', WorkflowSchema);

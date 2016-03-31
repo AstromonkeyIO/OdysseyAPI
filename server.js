@@ -17,6 +17,7 @@ var Workflow = require('./app/models/workflow');
 var Task     = require('./app/models/task');
 var Comment     = require('./app/models/comment');
 
+
 mongoose.connect('mongodb://bob:1@ds023468.mlab.com:23468/odyssey', function(err, res) {
     console.log("mongoose connected");
     if (err) throw err;
@@ -348,94 +349,86 @@ router.route('/workflows/')
         });
 
     })
-    // get all workflows (accessed at GET http://localhost:8080/api/workflows)
+    // get workflows (accessed at GET http://localhost:8080/api/workflows)
     .get(function(req, res) { 
 
         res.header('Access-Control-Allow-Origin', '*'); 
         res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
         res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
         
-        workflowf.ind().populate('creator').exec(function(error, workflows) {
-            res.json(workflows);
-        })
+        // Get all the workflows that belongs to a particular board 
+        if(typeof(req.query.boardId) !== 'undefined')
+        {
+            Workflow.find({ 'board' :  (req.query.boardId) }).populate('creator').populate('tasks').exec(function(error, workflows) {
+            res.json(workflows);});
+
+        }
+        else // Get all the workflows in database
+        {
+            Workflow.find().populate('creator').populate('tasks').exec(function(error, workflows) {
+            res.json(workflows);});
+        }
 
     });
-/*
-router.route('/boards/:board_id')
 
-    // get the board with that id (accessed at GET http://localhost:8080/api/boards/:board_id)
+router.route('/workflows/:workflow_id')
+
+    // get the workflow with requested id (accessed at GET http://localhost:8080/api/workflows/:workflow_id)
     .get(function(req, res) {
 
-        Board.findById(req.params.board_id, function(err, board) {
+        Workflow.findById(req.params.workflow_id, function(err, workflow) {
             if (err)
                 res.send(err);
-            res.json(board);
+            res.json(workflow);
         });
 
     })
-    //update the board with that id (accessed at PUT http://localhost:8080/api/boards/:board_id)
+    //update the workflow with requested id (accessed at PUT http://localhost:8080/api/workflows/:workflow_id)
    .put(function(req, res) {
 
         res.header('Access-Control-Allow-Origin', '*'); 
         res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
         res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
         
-        // use our board model to find the board we want
-        Board.findById(req.params.board_id, function(err, board) {
+        // use our workflow model to find the workflow that we need to edit
+        Workflow.findById(req.params.workflow_id, function(err, workflow) {
 
             if (err)
                 res.send(err);
 
-            board.title = req.body.title;
-            board.description = req.body.description;
-            board.userId = req.body.userId;
+            workflow.title = req.body.title;
+            workflow.tasks = req.body.tasks;
             // save the user
-            board.save(function(err, board) {
+            workflow.save(function(err, workflow) {
                
                 if (err)
                     res.send(err);
 
-                res.json(board);
+                res.json(workflow);
 
             });
 
         });
     })
-    //delete the board with that id (accessed at DELETE http://localhost:8080/api/boards/:board_id)
+    //delete the workflow with requested id (accessed at DELETE http://localhost:8080/api/workflows/:workflow_id)
     .delete(function(req, res) {
 
         res.header('Access-Control-Allow-Origin', '*'); 
         res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
         res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
 
-        Board.remove({
-            _id: req.params.board_id
-        }, function(err, board) {
+        Workflow.remove({
+            _id: req.params.workflow_id
+        }, function(err, workflow) {
             
             if (err)
                 res.send(err);
 
-            res.json({ message: 'Successfully deleted', board: board });
+            res.json({ message: 'Successfully deleted', workflow: workflow});
 
         });
-    });
-
-router.route('/boards/user/:user_id')
-
-    // get the board with user_id (accessed at GET http://localhost:8080/api/boards/:user_id)
-    .get(function(req, res) {
-
-        Board.find({ 'userId' :  req.params.user_id}, function(err, board) {
-            if (err)
-                res.send(err);
-
-            console.log("found by user id");
-            res.json(board);
-        });
-
     });
 /****/
-
 
 
 // Tasks API Calls
