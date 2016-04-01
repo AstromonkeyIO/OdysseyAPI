@@ -467,7 +467,8 @@ router.route('/workflows/:workflow_id')
         task.workflow = req.params.workflow_id; // set the id of the board that the task is in (comes from the request)
         task.assignee = req.body.assigneeId; // set the id of the assignee
         //task.workflow = req.body.workflow;
-
+        //comments
+        
         task.save(function(err, task) {
             if (err)
                 res.send(err);
