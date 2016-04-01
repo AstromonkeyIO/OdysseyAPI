@@ -393,6 +393,10 @@ router.route('/workflows/:workflow_id')
     // get the workflow with requested id (accessed at GET http://localhost:8080/api/workflows/:workflow_id)
     .get(function(req, res) {
 
+        res.header('Access-Control-Allow-Origin', '*'); 
+        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
+        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+
         Workflow.findById(req.params.workflow_id, function(err, workflow) {
             if (err)
                 res.send(err);
