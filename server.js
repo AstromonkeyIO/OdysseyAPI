@@ -8,7 +8,8 @@ var express    = require('express');        // call express
 var app        = express();                 // define our app using express
 var bodyParser = require('body-parser');
 var mongoose   = require('mongoose');
-var cors = require('cors')
+var cors = require('cors');
+var nodemailer = require('nodemailer');
 //var relationship = require("mongoose-relationship");
 var Bear     = require('./app/models/bear');
 var User     = require('./app/models/user');
@@ -127,13 +128,27 @@ router.route('/users/')
     // get all users (accessed at GET http://localhost:8080/api/users)
     .get(function(req, res) { 
 
-        User.find(function(err, users) {
-            if (err) {
-                res.send(err);
-            } else {
-                res.send("callback(" + JSON.stringify(users) + ")");
-            }
-        });
+        if(req.query.q) {
+
+            User.find(
+                { "username": { "$regex": req.query.q, "$options": "i" } },
+                function(err, users) {
+
+                    res.json(users);
+                } 
+            );
+
+        } else {
+
+            User.find(function(err, users) {
+                if (err) {
+                    res.send(err);
+                } else {
+                    res.send("callback(" + JSON.stringify(users) + ")");
+                }
+            });
+
+        }
 
     });
 
@@ -756,6 +771,37 @@ router.route('/bears/:bear_id')
     });
 });
 
+
+router.route('/mail/').post(function(req, res) {
+
+    var transporter = nodemailer.createTransport({
+        service: 'Gmail',
+        auth: {
+            user: 'teryun93@gmail.com', // Your email id
+            pass: 'Google23' // Your password
+        }
+    });
+
+    var text = 'Hello world from \n\n';
+    var mailOptions = {
+    from: 'teryun93@gmail.com', // sender address
+    to: 'teryun93@gmail.com', // list of receivers
+    subject: 'Email Example', // Subject line
+    text: text //, // plaintext body
+    // html: '<b>Hello world ✔</b>' // You can choose to send an HTML body instead
+    };
+
+    transporter.sendMail(mailOptions, function(error, info){
+        if(error){
+            console.log(error);
+            res.json({yo: 'error'});
+        }else{
+            console.log('Message sent: ' + info.response);
+            res.json({yo: info.response});
+        };
+    });
+
+});
 
 
 /*
