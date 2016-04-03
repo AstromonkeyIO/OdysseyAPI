@@ -104,15 +104,6 @@ router.route('/users/')
         user.password = req.body.password;  // set the password (comes from the request)
         user.email = req.body.email;
 
-        user.save(function(err, user) {
-            if (err)
-                res.send(err);
-
-            res.json(user);
-        });
-
-        /*
-
         User.findOne({username : user.username}, function(err, existingUser) {
 
             if(err) {
@@ -132,8 +123,7 @@ router.route('/users/')
                 });
             }
 
-        });  
-        */      
+        });      
 
     })
     // get all users (accessed at GET http://localhost:8080/api/users)
