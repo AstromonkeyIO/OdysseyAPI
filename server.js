@@ -782,7 +782,7 @@ router.route('/bears/:bear_id')
 });
 
 
-router.route('/mail').post(function(req, res) {
+router.route('/mail/tasks').post(function(req, res) {
 
     var transporter = nodemailer.createTransport({
         service: 'Gmail',
@@ -796,9 +796,9 @@ router.route('/mail').post(function(req, res) {
     var mailOptions = {
     from: 'teryun93@gmail.com', // sender address
     to: req.body.recipientEmail, // list of receivers
-    subject: 'You got assigned a task!', // Subject line
-        text: text //, // plaintext body
-        // html: '<b>Hello world ✔</b>' // You can choose to send an HTML body instead
+    subject: 'You got assigned a task!' , // Subject line
+        //text: req.body.task.title //, // plaintext body
+        html: '<b>'+ req.body.task.title+'</b> <p>Assigned by:'+ req.body.assigner.username+'</p>' // You can choose to send an HTML body instead
     };
 
     transporter.sendMail(mailOptions, function(error, info){
