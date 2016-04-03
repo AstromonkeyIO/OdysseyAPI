@@ -342,12 +342,19 @@ router.route('/boards/:board_id/workflows')
         */
         
         Workflow.find({ 'board' :  (req.params.board_id) }).populate('creator').populate('tasks').populate({
-            path: 'tasks',
-                // Get friends of friends - populate the 'friends' array for every friend
-            populate: { path: 'assignee' }
-            }).exec(function(error, workflows) {
+                path: 'tasks',
+                populate: { path: 'assignee' }
+            })
+            .populate({
+                path: 'tasks',
+                populate: { path: 'comments' }
+            })
+            .populate({
+                path: 'tasks',
+                populate: { path: 'creator' }
+            })
+            .exec(function(error, workflows) {
             res.json(workflows);});
-
         });
 
 router.route('/boards/user/:user_id')
