@@ -335,7 +335,7 @@ router.route('/boards/:board_id/workflows')
         res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
         res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
 
-        Workflow.find({ 'board' :  (req.params.board_id) }).populate('creator').populate('tasks').exec(function(error, workflows) {
+        Workflow.find({ 'board' :  (req.params.board_id) }).populate('creator').populate('tasks').populate('tasks.creator').populate('tasks.assignee').populate('tasks.comments').exec(function(error, workflows) {
             res.json(workflows);});
 
         });
@@ -802,31 +802,6 @@ router.route('/mail/').post(function(req, res) {
     });
 
 });
-
-
-/*
-router.route('/bears').post(function(req, res) {
-
-    var bear = new Bear();      // create a new instance of the Bear model
-    bear.name = req.body.name;  // set the bears name (comes from the request)
-
-    // save the bear and check for errors
-    bear.save(function(err) {
-        if (err)
-            res.send(err);
-
-        res.json({ message: 'Bear created!' });
-    });
-
-}).get(function(req, res) {
-        Bear.find(function(err, bears) {
-            if (err)
-                res.send(err);
-
-            res.json(bears);
-        });
-});
-*/
 
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
