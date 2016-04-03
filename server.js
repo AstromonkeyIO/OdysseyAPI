@@ -334,8 +334,18 @@ router.route('/boards/:board_id/workflows')
         res.header('Access-Control-Allow-Origin', '*'); 
         res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
         res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-
+        /*
         Workflow.find({ 'board' :  (req.params.board_id) }).populate('creator').populate('tasks').populate('tasks.creator').populate('tasks.assignee').populate('tasks.comments').exec(function(error, workflows) {
+            res.json(workflows);});
+
+        });
+        */
+        
+        Workflow.find({ 'board' :  (req.params.board_id) }).populate('creator').populate('tasks').populate({
+            path: 'tasks',
+                // Get friends of friends - populate the 'friends' array for every friend
+            populate: { path: 'assignee' }
+            }).exec(function(error, workflows) {
             res.json(workflows);});
 
         });
