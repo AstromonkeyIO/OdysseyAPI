@@ -344,7 +344,10 @@ router.route('/boards/:board_id/workflows')
         
         Workflow.find({ 'board' :  (req.params.board_id) }).populate('creator').populate('tasks').populate({
                 path: 'tasks',
-                populate: { path: 'assignee', 'creator' }
+                populate: { path: 'assignee'}
+            }).populate({
+                path: 'tasks',
+                populate: { path: 'creator'}
             }).exec(function(error, workflows) {
             res.json(workflows);});
         });
