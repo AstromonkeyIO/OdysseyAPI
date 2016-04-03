@@ -102,7 +102,8 @@ router.route('/users/')
         var user = new User();      // create a new instance of the User model
         user.username = req.body.username;  // set the username (comes from the request)
         user.password = req.body.password;  // set the password (comes from the request)
-        
+        user.email = req.body.email;
+
         User.findOne({username : user.username}, function(err, existingUser) {
 
             if(err) {
@@ -781,7 +782,7 @@ router.route('/bears/:bear_id')
 });
 
 
-router.route('/mail/').post(function(req, res) {
+router.route('/mail').post(function(req, res) {
 
     var transporter = nodemailer.createTransport({
         service: 'Gmail',
@@ -794,10 +795,10 @@ router.route('/mail/').post(function(req, res) {
     var text = 'Hello world from \n\n';
     var mailOptions = {
     from: 'teryun93@gmail.com', // sender address
-    to: 'teryun93@gmail.com', // list of receivers
-    subject: 'Email Example', // Subject line
-    text: text //, // plaintext body
-    // html: '<b>Hello world ✔</b>' // You can choose to send an HTML body instead
+    to: req.body.recipientEmail, // list of receivers
+    subject: 'You got assigned a task!', // Subject line
+        text: text //, // plaintext body
+        // html: '<b>Hello world ✔</b>' // You can choose to send an HTML body instead
     };
 
     transporter.sendMail(mailOptions, function(error, info){
