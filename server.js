@@ -667,6 +667,10 @@ router.route('/comments/')
     // create a comment(accessed at POST http://localhost:8080/api/comments)
     .post(function(req, res) {
 
+        res.header('Access-Control-Allow-Origin', '*'); 
+        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
+        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+
         var comment= new Comment();      // create a new instance of the Comment model
         comment.comment = req.body.comment;  // set the comment (comes from the request)
         //comment.date = req.body.date;  // set the date(comes from the request)
@@ -783,6 +787,10 @@ router.route('/bears/:bear_id')
 
 
 router.route('/mail/tasks').post(function(req, res) {
+
+    res.header('Access-Control-Allow-Origin', '*'); 
+    res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
 
     var transporter = nodemailer.createTransport({
         service: 'Gmail',
