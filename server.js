@@ -345,7 +345,7 @@ router.route('/boards/:board_id/workflows')
         
         Workflow.find({ 'board' :  (req.params.board_id) }).populate('creator').populate('tasks').populate({
                 path: 'tasks',
-                populate: [{ path: 'assignee'}, { path: 'creator'}, { path: 'comments'}]
+                populate: [{ path: 'assignee'}, { path: 'creator'}, { path: 'comments', populate: {path: 'creator'}}]
             }).exec(function(error, workflows) {
             res.json(workflows);});
         });
@@ -680,7 +680,7 @@ router.route('/comments/')
         comment.save(function(err, comment) {
             if (err)
                 res.send(err);
-                
+    
             Task.findById(taskId).populate('creator').populate('board').populate('assignee').populate('comments').exec(function(error, task) {
                 if(error)
                     res.json(error);
@@ -699,8 +699,9 @@ router.route('/comments/')
                     res.json(comment);
 
                 });
-            });            
-            //res.json(comment);
+            }); 
+              
+            res.json(comment);
         });       
 
     })
