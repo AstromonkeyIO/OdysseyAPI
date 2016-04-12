@@ -8,16 +8,12 @@ var express    = require('express');        // call express
 var app        = express();                 // define our app using express
 var bodyParser = require('body-parser');
 var mongoose   = require('mongoose');
-var cors = require('cors');
-var nodemailer = require('nodemailer');
 //var relationship = require("mongoose-relationship");
 var Bear     = require('./app/models/bear');
 var User     = require('./app/models/user');
 var Board     = require('./app/models/board');
-var Workflow = require('./app/models/workflow');
 var Task     = require('./app/models/task');
 var Comment     = require('./app/models/comment');
-
 
 mongoose.connect('mongodb://bob:1@ds023468.mlab.com:23468/odyssey', function(err, res) {
     console.log("mongoose connected");
@@ -32,12 +28,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // Add headers
-/*
 app.use(function (req, res, next) {
 
     // Website you wish to allow to connect
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8000');
-    //test 1
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:9000');
+
     // Request methods you wish to allow
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
 
@@ -51,26 +46,10 @@ app.use(function (req, res, next) {
     // Pass to next layer of middleware
     next();
 });
-*/
 
 
-allowCrossDomain = function(req, res, next) {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
-  if ('OPTIONS' === req.method) {
-    res.send(200);
-  } else {
-    next();
-  }
-};
 
-app.use(allowCrossDomain);
-
-var port = process.env.PORT || 8080; 
-
-//app.use(cors());
-//app.options('*', cors()); // include before other routes
+var port = process.env.PORT || 9999;        // set our port
 
 // ROUTES FOR OUR API
 // =============================================================================
@@ -84,12 +63,9 @@ router.use(function(req, res, next) {
 });
 
 
-
 // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
 router.get('/', function(req, res) {
-
-    res.json({ message: 'hooray! welcome to our api!' });
-
+    res.json({ message: 'hooray! welcome to our api!' });   
 });
 
 
@@ -102,8 +78,7 @@ router.route('/users/')
         var user = new User();      // create a new instance of the User model
         user.username = req.body.username;  // set the username (comes from the request)
         user.password = req.body.password;  // set the password (comes from the request)
-        user.email = req.body.email;
-
+        
         User.findOne({username : user.username}, function(err, existingUser) {
 
             if(err) {
@@ -123,33 +98,19 @@ router.route('/users/')
                 });
             }
 
-        });      
+        });        
 
     })
     // get all users (accessed at GET http://localhost:8080/api/users)
     .get(function(req, res) { 
 
-        if(req.query.q) {
-
-            User.find(
-                { "username": { "$regex": req.query.q, "$options": "i" } },
-                function(err, users) {
-
-                    res.json(users);
-                } 
-            );
-
-        } else {
-
-            User.find(function(err, users) {
-                if (err) {
-                    res.send(err);
-                } else {
-                    res.send("callback(" + JSON.stringify(users) + ")");
-                }
-            });
-
-        }
+        User.find(function(err, users) {
+            if (err) {
+                res.send(err);
+            } else {
+                res.send("callback(" + JSON.stringify(users) + ")");
+            }
+        });
 
     });
 
@@ -158,10 +119,6 @@ router.route('/users/:username/:password')
     // find user by username and password (accessed at GET http://localhost:8080/api/users/:username/:password)
     .get(function(req, res) {
 
-        res.header('Access-Control-Allow-Origin', '*'); 
-        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-        
         username = req.params.username;
         password = req.params.password;
 
@@ -226,10 +183,6 @@ router.route('/boards/')
     // create a board (accessed at POST http://localhost:8080/api/boards)
     .post(function(req, res) {
 
-        res.header('Access-Control-Allow-Origin', '*'); 
-        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-        
         var board = new Board();      // create a new instance of the Board model
         board.title = req.body.title;  // set the title (comes from the request)
         board.description = req.body.description;  // set the description (comes from the request)
@@ -253,16 +206,12 @@ router.route('/boards/')
                 });
             }
 
-        });       
+        });        
 
     })
     // get all boards (accessed at GET http://localhost:8080/api/boards)
     .get(function(req, res) { 
 
-        res.header('Access-Control-Allow-Origin', '*'); 
-        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-        
         Board.find().populate('creator').exec(function(error, boards) {
             res.json(boards);
         })
@@ -284,10 +233,6 @@ router.route('/boards/:board_id')
     //update the board with that id (accessed at PUT http://localhost:8080/api/boards/:board_id)
    .put(function(req, res) {
 
-        res.header('Access-Control-Allow-Origin', '*'); 
-        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-        
         // use our board model to find the board we want
         Board.findById(req.params.board_id, function(err, board) {
 
@@ -302,7 +247,7 @@ router.route('/boards/:board_id')
                
                 if (err)
                     res.send(err);
-
+                console.log("updated");
                 res.json(board);
 
             });
@@ -311,11 +256,6 @@ router.route('/boards/:board_id')
     })
     //delete the board with that id (accessed at DELETE http://localhost:8080/api/boards/:board_id)
     .delete(function(req, res) {
-
-        res.header('Access-Control-Allow-Origin', '*'); 
-        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-
         Board.remove({
             _id: req.params.board_id
         }, function(err, board) {
@@ -328,26 +268,6 @@ router.route('/boards/:board_id')
         });
     });
 
-router.route('/boards/:board_id/workflows')
-
-    .get(function(req, res) {
-
-        res.header('Access-Control-Allow-Origin', '*'); 
-        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-        /*
-        Workflow.find({ 'board' :  (req.params.board_id) }).populate('creator').populate('tasks').populate('tasks.creator').populate('tasks.assignee').populate('tasks.comments').exec(function(error, workflows) {
-            res.json(workflows);});
-
-        });
-        */
-        Workflow.find({ 'board' :  (req.params.board_id) }).populate('creator').populate('tasks').populate({
-                path: 'tasks',
-                populate: [{ path: 'assignee'}, { path: 'creator'}, { path: 'comments', populate: {path: 'creator'}}]
-            }).exec(function(error, workflows) {
-            res.json(workflows);});
-        });
-//
 router.route('/boards/user/:user_id')
 
     // get the board with user_id (accessed at GET http://localhost:8080/api/boards/:user_id)
@@ -365,238 +285,62 @@ router.route('/boards/user/:user_id')
 /****/
 
 
-
-// Workflow API Calls
-router.route('/workflows/')
-
-    // create a worflow (accessed at POST http://localhost:8080/api/workflows)
-    .post(function(req, res) {
-
-        res.header('Access-Control-Allow-Origin', '*'); 
-        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-        
-        var workflow = new Workflow();      // create a new instance of the Board model
-        workflow.title = req.body.title;  // set the title (comes from the request)
-        workflow.creator = req.body.creatorId; // set the id of user creating the workflow (comes from the request)
-        workflow.board = req.body.boardId;  // set the id of the board that the workflow belongs to(comes from the request)
-
-        // save workflow to our database
-        workflow.save(function(err, workflow) {
-            if (err)
-                res.send(err);
-            res.json(workflow);
-        });
-
-    })
-    // get workflows (accessed at GET http://localhost:8080/api/workflows)
-    .get(function(req, res) { 
-
-        res.header('Access-Control-Allow-Origin', '*'); 
-        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-        
-        // Get all the workflows that belongs to a particular board 
-        if(typeof(req.query.boardId) !== 'undefined')
-        {
-            Workflow.find({ 'board' :  (req.query.boardId) }).populate('creator').populate('tasks').exec(function(error, workflows) {
-            res.json(workflows);});
-
-        }
-        else // Get all the workflows in database
-        {
-            Workflow.find().populate('creator').populate('tasks').exec(function(error, workflows) {
-            res.json(workflows);});
-        }
-
-    });
-
-router.route('/workflows/:workflow_id')
-
-    // get the workflow with requested id (accessed at GET http://localhost:8080/api/workflows/:workflow_id)
-    .get(function(req, res) {
-
-        res.header('Access-Control-Allow-Origin', '*'); 
-        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-
-        Workflow.findById(req.params.workflow_id, function(err, workflow) {
-            if (err)
-                res.send(err);
-
-            res.json(workflow);
-        });
-
-    })
-    //update the workflow with requested id (accessed at PUT http://localhost:8080/api/workflows/:workflow_id)
-   .put(function(req, res) {
-
-        res.header('Access-Control-Allow-Origin', '*'); 
-        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-        
-        // use our workflow model to find the workflow that we need to edit
-        Workflow.findById(req.params.workflow_id, function(err, workflow) {
-
-            if (err)
-                res.send(err);
-
-            workflow.title = req.body.title;
-            workflow.tasks = req.body.tasks;
-            // save the user
-            workflow.save(function(err, workflow) {
-               
-                if (err)
-                    res.send(err);
-
-                res.json(workflow);
-
-            });
-
-        });
-    })
-    //delete the workflow with requested id (accessed at DELETE http://localhost:8080/api/workflows/:workflow_id)
-    .delete(function(req, res) {
-
-        res.header('Access-Control-Allow-Origin', '*'); 
-        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-
-        Workflow.remove({
-            _id: req.params.workflow_id
-        }, function(err, workflow) {
-            
-            if (err)
-                res.send(err);
-
-            res.json({ message: 'Successfully deleted', workflow: workflow});
-
-        });
-    });
-
- router.route('/workflows/:workflow_id/tasks')
-
-    // addd a new task to the requested workflow (accessed at POST http://localhost:8080/api/workflows/:work_flow_id/tasks)
-    .post(function(req, res) {
-
-        res.header('Access-Control-Allow-Origin', '*'); 
-        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-        
-        var task = new Task();      // create a new instance of the Task model
-        task.title = req.body.title;  // set the title (comes from the request)
-        task.description = req.body.description;  // set the description (comes from the request)
-        task.creator = req.body.creatorId; // set the id of user creating the task (comes from the request)
-        task.workflow = req.params.workflow_id; // set the id of the board that the task is in (comes from the request)
-        task.assignee = req.body.assigneeId; // set the id of the assignee
-        //task.workflow = req.body.workflow;
-        //comments
-        //
-        task.save(function(err, task) {
-            if (err)
-                res.send(err);
-
-            var task = task;
-            Workflow.findById(req.params.workflow_id, function(err, workflow) {
-
-                if (err)
-                    res.send(err);
-
-                workflow.tasks.push(task._id)
-                workflow.save(function(err, workflow) {
-                   
-                    if (err)
-                        res.send(err);
-
-                    //res.json(workflow);
-
-                });
-
-            });            
-
-            res.json(task);
-        });        
-
-    })
-    //delete the workflow with requested id (accessed at DELETE http://localhost:8080/api/workflows/:workflow_id)
-    .delete(function(req, res) {
-
-        res.header('Access-Control-Allow-Origin', '*'); 
-        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-
-        Workflow.remove({
-            _id: req.params.workflow_id
-        }, function(err, workflow) {
-            
-            if (err)
-                res.send(err);
-
-            res.json({ message: 'Successfully deleted', workflow: workflow});
-
-        });
-    });
-
-/****/
-
-
 // Tasks API Calls
 router.route('/tasks/')
 
     // create a task (accessed at POST http://localhost:8080/api/tasks)
     .post(function(req, res) {
 
-        res.header('Access-Control-Allow-Origin', '*'); 
-        res.header('Access-Control-Allow-Methods', 'GET, POST');
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-
         var task = new Task();      // create a new instance of the Task model
         task.title = req.body.title;  // set the title (comes from the request)
         task.description = req.body.description;  // set the description (comes from the request)
         task.creator = req.body.creatorId; // set the id of user creating the task (comes from the request)
-        task.boardId = req.body.boardId; // set the id of the board that the task is in (comes from the request)
-        task.assignee = req.body.assigneeId; // set the id of the assignee
-        task.workflow = req.body.workflow;
+        task.board = req.body.boardId // set the id of the board that the task is in (comes from the request)
+        task.assignee = req.body.assigneeId // set the id of the assignee
 
-        task.save(function(err, task) {
-            if (err)
+        // check if the task already exists or not
+        Task.findOne({title : task.title}, function(err, existingTask) {
+
+            if(err) {
                 res.send(err);
-            
-            // store saved task temporarily to return it later
-            var task = task;
+            }
 
-            res.json(task);
-            /*
-            var board = new Board(); // create a new instance of the Board model
-            // find the board that it is assigned to
-            Board.findById(task.board).populate('creator').populate('tasks').exec(function(error, board) {
-                if(error)
-                    res.json(error);
-                // add the new task to the board that it belongs to and save
-                console.log(board);
-                board.tasks.push(task._id);
-                board.save(function(err, board) {
-                    res.json(task);
+            if(existingTask) {
+                res.json("task already exists");
+            } else {
+                // save the task and check for errors
+                task.save(function(err, task) {
+                    if (err)
+                        res.send(err);
+                    
+                    // store saved task temporarily to return it later
+                    var task = task;
+                    var board = new Board(); // create a new instance of the Board model
+                    // find the board that it is assigned to
+                    Board.findById(task.board).populate('creator').populate('tasks').exec(function(error, board) {
+                        if(error)
+                            res.json(error);
+                        // add the new task to the board that it belongs to and save
+                        console.log(board);
+                        board.tasks.push(task._id);
+                        board.save(function(err, board) {
+                            res.json(task);
+                        });
+                    });
+
                 });
-            });
-            */
+            }
 
-        });       
+        });        
 
     })
     // get all tasks (accessed at GET http://localhost:8080/api/tasks)
     .get(function(req, res) { 
 
-        if(typeof(req.query.boardId) !== 'undefined') {
+        Task.find().populate('creator').populate('board').populate('assignee').populate('comments').exec(function(error, tasks) {
+            res.json(tasks);
+        })
 
-            Task.find({boardId : req.query.boardId}).populate('creator').populate('board').populate('assignee').populate('comments').exec(function(error, tasks) {
-                res.json(tasks);
-            });
-        } else {
-            Task.find().populate('creator').populate('board').populate('assignee').populate('comments').exec(function(error, tasks) {
-                res.json(tasks);
-            })
-        }
     });
 
 router.route('/tasks/:task_id')
@@ -611,22 +355,18 @@ router.route('/tasks/:task_id')
                 res.json(task);
             });
 
+            //res.json(task);
         });
     })
     // update the task with that id (accessed at PUT http://localhost:8080/api/tasks/:task_id)
    .put(function(req, res) {
 
-        res.header('Access-Control-Allow-Origin', '*'); 
-        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-        
         // use our task model to find the task we want
         Task.findById(req.params.task_id, function(err, task) {
 
             if (err)
                 res.send(err);
 
-            //
             // update the task
             task.title = req.body.title;
             task.description = req.body.description;
@@ -645,11 +385,6 @@ router.route('/tasks/:task_id')
     })
     // delete the task with that id (accessed at DELETE http://localhost:8080/api/tasks/:task_id)
     .delete(function(req, res) {
-
-        res.header('Access-Control-Allow-Origin', '*'); 
-        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-
         Task.remove({
             _id: req.params.task_id
         }, function(err, task) {
@@ -667,10 +402,6 @@ router.route('/comments/')
     // create a comment(accessed at POST http://localhost:8080/api/comments)
     .post(function(req, res) {
 
-        res.header('Access-Control-Allow-Origin', '*'); 
-        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-
         var comment= new Comment();      // create a new instance of the Comment model
         comment.comment = req.body.comment;  // set the comment (comes from the request)
         //comment.date = req.body.date;  // set the date(comes from the request)
@@ -683,7 +414,7 @@ router.route('/comments/')
         comment.save(function(err, comment) {
             if (err)
                 res.send(err);
-    
+                
             Task.findById(taskId).populate('creator').populate('board').populate('assignee').populate('comments').exec(function(error, task) {
                 if(error)
                     res.json(error);
@@ -702,9 +433,8 @@ router.route('/comments/')
                     res.json(comment);
 
                 });
-            }); 
-              
-            res.json(comment);
+            });            
+            //res.json(comment);
         });       
 
     })
@@ -786,40 +516,30 @@ router.route('/bears/:bear_id')
 });
 
 
-router.route('/mail/tasks').post(function(req, res) {
 
-    res.header('Access-Control-Allow-Origin', '*'); 
-    res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+/*
+router.route('/bears').post(function(req, res) {
 
-    var transporter = nodemailer.createTransport({
-        service: 'Gmail',
-        auth: {
-            user: 'teryun93@gmail.com', // Your email id
-            pass: 'Google23' // Your password
-        }
+    var bear = new Bear();      // create a new instance of the Bear model
+    bear.name = req.body.name;  // set the bears name (comes from the request)
+
+    // save the bear and check for errors
+    bear.save(function(err) {
+        if (err)
+            res.send(err);
+
+        res.json({ message: 'Bear created!' });
     });
 
-    var text = 'Hello world from \n\n';
-    var mailOptions = {
-    from: 'teryun93@gmail.com', // sender address
-    to: req.body.recipientEmail, // list of receivers
-    subject: 'You got assigned a task!' , // Subject line
-        //text: req.body.task.title //, // plaintext body
-        html: '<b>'+ req.body.task.title+'</b> <p>Assigned by:'+ req.body.assigner.username+'</p>' // You can choose to send an HTML body instead
-    };
+}).get(function(req, res) {
+        Bear.find(function(err, bears) {
+            if (err)
+                res.send(err);
 
-    transporter.sendMail(mailOptions, function(error, info){
-        if(error){
-            console.log(error);
-            res.json({yo: 'error'});
-        }else{
-            console.log('Message sent: ' + info.response);
-            res.json({yo: info.response});
-        };
-    });
-
+            res.json(bears);
+        });
 });
+*/
 
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
