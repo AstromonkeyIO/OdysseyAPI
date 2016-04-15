@@ -25,7 +25,13 @@ var TaskSchema   = new Schema({
     comments: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Comment'
-    }]
+    }],
+
+    //ryan adding stuff
+
+    due_date: Date
+
+
 });
 
 module.exports = mongoose.model('Task', TaskSchema);

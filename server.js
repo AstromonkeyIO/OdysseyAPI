@@ -70,6 +70,8 @@ router.get('/', function(req, res) {
 
 
 // User API Calls
+
+
 router.route('/users/')
 
     // create a user (accessed at POST http://localhost:8080/api/users)
@@ -130,6 +132,9 @@ router.route('/users/:username/:password')
                 res.send(user);
         });
     });
+
+    // {"_id":"56ee25df8a4d7505bc851ba7","password":"1","username":"joe","__v":0} <-- FOR TEST PURPOSES
+
 
 router.route('/users/:user_id')
 
@@ -342,6 +347,65 @@ router.route('/tasks/')
         })
 
     });
+
+
+// FILTERING -> get the tasks that match a given search term (accessed at GET http://localhost:8080/api/tasks/search/title)
+
+router.route('/tasks/search/title')
+    
+    // get a task that matches title
+    .get(function(req, res){
+        Task.find({
+            "title" : { "$regex" : req.query.q, "$options" : "i" }},
+        function(err, tasks){
+            res.json(tasks);
+        });
+    });
+
+router.route('/tasks/search/description')
+
+    // get a task that matches description
+    .get(function(req, res){
+        Task.find({
+            "description" : { "$regex" : req.query.q, "$options" : "i"}},
+            function(err, tasks){
+                res.json(tasks);
+             });
+        });
+
+router.route('/tasks/search/priority')
+
+    // get a task that matches priority
+    .get(function(req, res){
+        Task.find({
+            "priority" : { "$regex" : req.query.q, "$options" : "i"}},
+            function(err, tasks){
+                res.json(tasks);
+            });
+        });
+
+router.route('/tasks/search/due_date')
+
+    .get(function(req, res){
+        //var object = {"due_date": {"$eq": new Date(parseInt(req.query.year), parseInt(req.query.month), parseInt(req.query.day))}}
+        Task.find({
+            "due_date": {"$eq": new Date(parseInt(req.query.year), parseInt(req.query.month), parseInt(req.query.day))}},
+            function(err, tasks){
+                res.json(tasks);
+            });
+    });
+
+router.route('/tasks/search/past_due')
+
+    .get(function(req, res){
+        // ask for all tasks have due_dates that are BEFORE today's date. We use today's date because specifying a different due date has no relevance
+        Task.find({
+            "due_date": {"$lt": new Date() }},
+            function(err, tasks){
+                res.json(tasks);
+            });
+    });
+
 
 router.route('/tasks/:task_id')
 
