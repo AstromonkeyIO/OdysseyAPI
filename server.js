@@ -407,6 +407,45 @@ router.route('/tasks/search/past_due')
     });
 
 
+router.route('/tasks/search/creator')
+
+    .get(function(req, res){
+        User.find({
+            "username" : req.query.q}, 
+            function(req, users){
+                console.log(users);
+                console.log(users[0]._id);
+                Task.find({
+                    "creator" : users[0]._id}, 
+                    function(err, tasks){
+                        res.json(tasks);
+            });
+
+        });
+    
+    });
+
+
+router.route('/tasks/search/assignee')
+
+    .get(function(req, res){
+        User.find({
+            "username" : req.query.q}, 
+            function(req, users){
+                console.log(users);
+                console.log(users[0]._id);
+                Task.find({
+                    "creator" : users[0]._id}, 
+                    function(err, tasks){
+                        res.json(tasks);
+            });
+
+        });
+    
+    });
+
+
+
 router.route('/tasks/:task_id')
 
     // get the task with that id (accessed at GET http://localhost:8080/api/tasks/:task_id)
