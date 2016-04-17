@@ -289,6 +289,113 @@ router.route('/boards/user/:user_id')
     });
 /****/
 
+//searching when on a board page 
+
+
+router.route('/board/:board_id/search/task_title')
+    
+    // get a task that matches title
+    .get(function(req, res){
+        Task.find({
+            "title" : { "$regex" : req.query.q, "$options" : "i" }, 
+            "board" : req.params.board_id },
+        function(err, tasks){
+            res.json(tasks);
+        });
+    });
+
+router.route('/board/:board_id/search/task_description')
+
+    // get a task that matches description
+    .get(function(req, res){
+        Task.find({
+            "description" : { "$regex" : req.query.q, "$options" : "i"}, 
+            "board" : req.params.board_id },
+            function(err, tasks){
+                res.json(tasks);
+             });
+        });
+
+router.route('/board/:board_id/search/task_priority')
+
+    // get a task that matches priority
+    .get(function(req, res){
+        Task.find({
+            "priority" : { "$regex" : req.query.q, "$options" : "i"}, 
+            "board" : req.params.board_id },
+            function(err, tasks){
+                res.json(tasks);
+            });
+        });
+
+router.route('/board/:board_id/search/task_due_date')
+
+    .get(function(req, res){
+        Task.find({
+            "due_date": {"$eq": new Date(parseInt(req.query.year), parseInt(req.query.month), parseInt(req.query.day))}, 
+            "board" : req.params.board_id },
+            function(err, tasks){
+                res.json(tasks);
+            });
+    });
+
+// ask for all tasks have due_dates 
+//that are BEFORE today's date. 
+//We use today's date because specifying 
+//a different due date has no relevance
+
+router.route('/board/:board_id/search/task_past_due')
+
+    .get(function(req, res){
+        Task.find({
+            "due_date": {"$lt": new Date() }, 
+            "board" : req.params.board_id },
+            function(err, tasks){
+                res.json(tasks);
+            });
+    });
+
+//searching for an creator
+//regex doesnt work, only returns 
+//when username is perfect match
+router.route('/board/:board_id/search/task_creator')
+
+    .get(function(req, res){
+        User.find({
+            "username" : { "$regex" : req.query.q, "$options" : "i"}, 
+            "board" : req.params.board_id }, 
+            function(req, users){
+                Task.find({
+                    "creator" : users[0]._id}, 
+                    function(err, tasks){
+                        res.json(tasks);
+            });
+
+        });
+    
+    });
+
+//searching for an assignee
+//regex doesnt work, only returns 
+//when username is perfect match
+router.route('/board/:board_id/search/task_assignee')
+
+    .get(function(req, res){
+        User.find({
+            "username" : { "$regex" : req.query.q, "$options" : "i"}, 
+            "board" : req.params.board_id }, 
+            function(req, users){
+                Task.find({
+                    "creator" : users[0]._id}, 
+                    function(err, tasks){
+                        res.json(tasks);
+            });
+
+        });
+    
+    });
+
+
 
 // Tasks API Calls
 router.route('/tasks/')
@@ -387,7 +494,6 @@ router.route('/tasks/search/priority')
 router.route('/tasks/search/due_date')
 
     .get(function(req, res){
-        //var object = {"due_date": {"$eq": new Date(parseInt(req.query.year), parseInt(req.query.month), parseInt(req.query.day))}}
         Task.find({
             "due_date": {"$eq": new Date(parseInt(req.query.year), parseInt(req.query.month), parseInt(req.query.day))}},
             function(err, tasks){
@@ -395,10 +501,14 @@ router.route('/tasks/search/due_date')
             });
     });
 
+// ask for all tasks have due_dates 
+//that are BEFORE today's date. 
+//We use today's date because specifying 
+//a different due date has no relevance
+
 router.route('/tasks/search/past_due')
 
     .get(function(req, res){
-        // ask for all tasks have due_dates that are BEFORE today's date. We use today's date because specifying a different due date has no relevance
         Task.find({
             "due_date": {"$lt": new Date() }},
             function(err, tasks){
@@ -406,15 +516,34 @@ router.route('/tasks/search/past_due')
             });
     });
 
-
+//searching for an creator
+//regex doesnt work, only returns 
+//when username is perfect match
 router.route('/tasks/search/creator')
 
     .get(function(req, res){
         User.find({
-            "username" : req.query.q}, 
+            "username" : { "$regex" : req.query.q, "$options" : "i"}}, 
             function(req, users){
-                console.log(users);
-                console.log(users[0]._id);
+                Task.find({
+                    "creator" : users[0]._id}, 
+                    function(err, tasks){
+                        res.json(tasks);
+            });
+
+        });
+    
+    });
+
+//searching for an assignee
+//regex doesnt work, only returns 
+//when username is perfect match
+router.route('/tasks/search/assignee')
+
+    .get(function(req, res){
+        User.find({
+            "username" : { "$regex" : req.query.q, "$options" : "i"}}, 
+            function(req, users){
                 Task.find({
                     "creator" : users[0]._id}, 
                     function(err, tasks){
@@ -426,16 +555,36 @@ router.route('/tasks/search/creator')
     });
 
 
-router.route('/tasks/search/assignee')
+
+//step one of searching for users (Tom's suggestion)
+router.route('/tasks/search/all_users')
 
     .get(function(req, res){
-        User.find({
-            "username" : req.query.q}, 
-            function(req, users){
-                console.log(users);
-                console.log(users[0]._id);
+        User.find(function(req, users){
+            res.json(users);
+        });
+    });
+
+
+//step four of searching for users (Tom's suggestion)
+router.route('/tasks/search/:user_id')
+    
+    .get(function(req, res){
+        User.find({"_id" : req.params.user_id}, function(req, users){
+            res.json(users);
+        });
+
+    });
+
+//search for tasks with a given board name
+router.route('/tasks/search/board')
+
+    .get(function(req, res){
+        Board.find({
+            "title" : { "$regex" : req.query.q, "$options" : "i"}}, 
+            function(req, boards){
                 Task.find({
-                    "creator" : users[0]._id}, 
+                    "board" : boards[0]._id}, 
                     function(err, tasks){
                         res.json(tasks);
             });
